@@ -18,30 +18,34 @@ const EventSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
-        index: true,
+        trim: true,
     },
     description: {
         type: String,
+        default: '',
     },
     category: {
         type: String,
         required: true,
+        trim: true,
     },
     city: {
         type: String,
         required: true,
         index: true,
+        trim: true,
     },
     venue: {
         type: String,
         required: true,
+        trim: true,
     },
     date: {
         type: Date,
         required: true,
         validate: {
             validator: function(value) {
-                return value >= new Date();
+                return value > new Date();
             },
             message: 'Event date must be in the future!'
         }
@@ -59,6 +63,7 @@ const EventSchema = new mongoose.Schema({
     seatsBooked: {
         type: Number,
         default: 0,
+        min: 0,
     },
     status: {
         type: String,
@@ -72,6 +77,7 @@ EventSchema.virtual('seatsRemaining').get(function() {
     return this.capacity - this.seatsBooked;
 });
 
+EventSchema.index({ title: 'text', description: 'text' });
 
 
 module.exports = mongoose.model('Event', EventSchema);

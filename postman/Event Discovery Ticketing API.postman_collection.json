@@ -1,0 +1,288 @@
+{
+  "info": {
+    "name": "Event Discovery Ticketing API",
+    "description": "End-to-end smoke tests for event management and booking. Set baseUrl if the API is not running at localhost:3000, then run the collection in order.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "eventId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Create event",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('eventDate', new Date(Date.now() + 86400000 * 30).toISOString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 201 Created', function () { pm.response.to.have.status(201); });",
+              "const event = pm.response.json();",
+              "pm.test('returns an event with remaining seats', function () {",
+              "    pm.expect(event).to.have.property('_id');",
+              "    pm.expect(event.title).to.eql('Postman API Test Event');",
+              "    pm.expect(event.seatsRemaining).to.eql(25);",
+              "});",
+              "pm.collectionVariables.set('eventId', event._id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman API Test Event\",\n  \"description\": \"Created by the Postman collection.\",\n  \"category\": \"Tech\",\n  \"city\": \"Lagos\",\n  \"venue\": \"Postman Test Hall\",\n  \"date\": \"{{eventDate}}\",\n  \"price\": 1000,\n  \"capacity\": 25\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/events"
+      }
+    },
+    {
+      "name": "List events",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200 OK', function () { pm.response.to.have.status(200); });",
+              "const response = pm.response.json();",
+              "pm.test('returns paginated event data', function () {",
+              "    pm.expect(response.data).to.be.an('array');",
+              "    pm.expect(response.pagination).to.include({ page: 1, limit: 10 });",
+              "    pm.expect(response.data.some((event) => event._id === pm.collectionVariables.get('eventId'))).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/events?page=1&limit=10&sort=date"
+      }
+    },
+    {
+      "name": "Get created event",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200 OK', function () { pm.response.to.have.status(200); });",
+              "const event = pm.response.json();",
+              "pm.test('returns the created event', function () {",
+              "    pm.expect(event._id).to.eql(pm.collectionVariables.get('eventId'));",
+              "    pm.expect(event.seatsRemaining).to.eql(25);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/events/{{eventId}}"
+      }
+    },
+    {
+      "name": "Update event",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200 OK', function () { pm.response.to.have.status(200); });",
+              "pm.test('returns the updated title', function () { pm.expect(pm.response.json().title).to.eql('Postman API Test Event Updated'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Postman API Test Event Updated\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/events/{{eventId}}"
+      }
+    },
+    {
+      "name": "Book seats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 201 Created', function () { pm.response.to.have.status(201); });",
+              "const response = pm.response.json();",
+              "pm.test('creates a booking and updates remaining seats', function () {",
+              "    pm.expect(response.booking).to.have.property('_id');",
+              "    pm.expect(response.booking.seats).to.eql(2);",
+              "    pm.expect(response.seatsRemaining).to.eql(23);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"attendeeName\": \"Postman Test User\",\n  \"attendeeEmail\": \"postman-test@example.com\",\n  \"seats\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/events/{{eventId}}/book"
+      }
+    },
+    {
+      "name": "List event bookings",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200 OK', function () { pm.response.to.have.status(200); });",
+              "const response = pm.response.json();",
+              "pm.test('includes the booking just created', function () {",
+              "    pm.expect(response.data).to.be.an('array').that.has.lengthOf.at.least(1);",
+              "    pm.expect(response.data[0].attendeeEmail).to.eql('postman-test@example.com');",
+              "    pm.expect(response.pagination.total).to.be.at.least(1);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/events/{{eventId}}/bookings?page=1&limit=10"
+      }
+    },
+    {
+      "name": "Reject invalid event input",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 400 Bad Request', function () { pm.response.to.have.status(400); });",
+              "const response = pm.response.json();",
+              "pm.test('returns validation details', function () {",
+              "    pm.expect(response.message).to.eql('Validation failed');",
+              "    pm.expect(response.errors).to.be.an('array').that.is.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"\",\n  \"category\": \"Tech\",\n  \"city\": \"Lagos\",\n  \"venue\": \"Postman Test Hall\",\n  \"date\": \"{{eventDate}}\",\n  \"price\": -1,\n  \"capacity\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/events"
+      }
+    },
+    {
+      "name": "Delete test event",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 200 OK', function () { pm.response.to.have.status(200); });",
+              "pm.test('confirms event deletion', function () { pm.expect(pm.response.json().message).to.eql('Event deleted'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/events/{{eventId}}"
+      }
+    },
+    {
+      "name": "Confirm deleted event is not found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('returns 404 Not Found', function () { pm.response.to.have.status(404); });",
+              "pm.test('returns not-found message', function () { pm.expect(pm.response.json().message).to.eql('Event not found'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/events/{{eventId}}"
+      }
+    }
+  ]
+}
