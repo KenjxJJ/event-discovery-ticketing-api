@@ -163,22 +163,19 @@ npx newman run "postman/Event Discovery Ticketing API.postman_collection.json" -
 Visual proof of functional endpoints and test results (stored in [`screenshots/`](./screenshots/)):
 
 ### 1. Events Query by Date Range & Sort
-![Events Date Range and Sort](screenshots/events.png)
+![Events Date Range and Sort](screenshots/Query%20Data.png)
 
 ### 2. City and Category Filtering
-![City and Category Filter](screenshots/City%20and%20Cateogry%20Filtration.png)
+![City and Category Filter](screenshots/City%20and%20Category.png)
 
 ### 3. Price Filter & Pagination
 ![Price Filter and Pagination](screenshots/Price%20filter%20and%20Pagination.png)
 
-### 4. Link with Pagination and Sort
-![Link with Pagination and Sort](screenshots/Link%20with%20Pagination%20and%20Sort.png)
+### 4. Successful Event Booking
+![Book Event](screenshots/Booking%20Attempt%20Ok.png)
 
-### 5. Successful Event Booking
-![Book Event](screenshots/Book%20Event.png)
-
-### 6. Booking Failure & Overbooking Prevention Attempt
-![Booking Failure Attempt](screenshots/Booking%20Failure%20Attempt.png)
+### 5. Booking Failure & Overbooking Prevention Attempt
+![Booking Failure Attempt](screenshots/Failed%20Book%20event.png)
 
 ---
 
