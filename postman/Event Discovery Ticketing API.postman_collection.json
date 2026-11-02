@@ -23,7 +23,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.collectionVariables.set('eventDate', new Date(Date.now() + 86400000 * 30).toISOString());"
+              "pm.collectionVariables.set('eventDate', new Date(Date.now() + 86400000 * 2).toISOString());"
             ]
           }
         },
